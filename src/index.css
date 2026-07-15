@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { background:#05070c; }
+body { margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+@layer components {
+  .cyber-bg { @apply min-h-screen bg-[#05070c] text-emerald-50; background-image: radial-gradient(circle at 20% 20%, rgba(16,185,129,.12), transparent 28%), radial-gradient(circle at 80% 0%, rgba(59,130,246,.12), transparent 25%), linear-gradient(180deg,#05070c,#08111f); }
+  .cyber-card { @apply rounded-2xl border border-emerald-400/20 bg-slate-950/70 shadow-2xl shadow-emerald-950/20 backdrop-blur; }
+  .cyber-input { @apply w-full rounded-xl border border-emerald-400/25 bg-black/40 px-4 py-3 text-sm text-emerald-50 outline-none placeholder:text-emerald-300/40 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-400/20; }
+  .cyber-btn { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-bold text-emerald-100 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50; }
+  .telegram-btn { @apply inline-flex items-center justify-center gap-3 rounded-xl border border-sky-400/35 bg-gradient-to-r from-sky-500/20 via-cyan-400/15 to-sky-400/20 px-4 py-2.5 text-sm font-bold text-sky-100 transition hover:border-sky-300 hover:bg-sky-400/25 hover:text-white; box-shadow: 0 12px 28px rgba(14,165,233,.16); }
+  .danger-btn { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-100 hover:bg-red-500/20 disabled:opacity-50; }
+  .muted { @apply text-emerald-200/60; }
+  .terminal-title { @apply font-mono text-xs uppercase tracking-[0.28em] text-emerald-300/80; }
+}
+
+@layer components {
+  .cyber-bg { @apply relative overflow-hidden; }
+  .matrix-backdrop { @apply pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-30; mask-image: linear-gradient(to bottom, transparent, black 18%, black 70%, transparent); }
+  .matrix-backdrop span { @apply absolute -top-40 whitespace-pre text-center font-mono text-xs leading-6 text-emerald-300/45; animation: matrixFall linear infinite; text-shadow: 0 0 16px rgba(52,211,153,.55); }
+  .cyber-bg > header, .cyber-bg > main, .cyber-bg > .cyber-card, .cyber-bg > div:not(.matrix-backdrop) { @apply relative z-10; }
+  .device-card { @apply block rounded-2xl border border-emerald-400/20 bg-slate-950/55 p-4 shadow-lg shadow-emerald-950/10 transition hover:-translate-y-0.5 hover:border-emerald-300/55 hover:bg-emerald-950/20; }
+  .status-pill { @apply whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold; }
+  .status-pill.online { @apply bg-emerald-400/15 text-emerald-300; }
+  .status-pill.offline { @apply bg-slate-500/15 text-slate-300; }
+  .compact { @apply px-3 py-2; }
+  .cyber-btn.active { @apply border-emerald-300/60 bg-emerald-400/25 text-emerald-50; }
+  .sms-row { @apply flex w-full items-start gap-4 p-4 text-left transition hover:bg-emerald-400/10; }
+  .sms-row-a { @apply bg-black/20; }
+  .sms-row-b { @apply bg-emerald-950/20; }
+}
+
+@keyframes matrixFall {
+  0% { transform: translateY(-20vh); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(120vh); opacity: 0; }
+}
+
+@layer components {
+  .login-shell { @apply relative z-10; animation: loginPulse 5s ease-in-out infinite; }
+  .login-matrix { @apply pointer-events-none fixed inset-0 z-0 overflow-hidden; }
+  .login-matrix i { @apply absolute top-[-10vh] not-italic font-mono text-[11px] tracking-[.35em] text-emerald-300/25; animation: matrixFall 8s linear infinite; }
+}
+@keyframes loginPulse { 0%,100% { box-shadow: 0 0 50px rgba(16,185,129,.12); } 50% { box-shadow: 0 0 90px rgba(16,185,129,.24); } }
+@layer components {
+  .device-card-compact { @apply p-3; }
+  .device-card-compact .status-pill { @apply px-2 py-1 text-[10px]; }
+  .folder-dot { @apply inline-block h-2.5 w-2.5 rounded-full shadow-lg; }
+  .folder-dot.online { @apply bg-emerald-400 shadow-emerald-400/40; }
+  .folder-dot.offline { @apply bg-red-400 shadow-red-400/40; }
+  .folder-dot.amber { @apply bg-yellow-300 shadow-yellow-300/40; }
+}
