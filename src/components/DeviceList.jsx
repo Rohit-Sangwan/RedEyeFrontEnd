@@ -4,7 +4,7 @@ import { FiBattery, FiClock, FiSearch, FiStar, FiTrash2, FiWifi, FiCheckSquare, 
 import { toast } from 'react-hot-toast'
 import { formatIndiaDateTime } from '../utils/time'
 
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from '../config'
 
 const displayName = (d) => {
   const base = d.model || d.device_uid || 'Unknown device'

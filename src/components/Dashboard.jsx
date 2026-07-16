@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiLogOut, FiSettings, FiZap, FiShield } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import DeviceList from './DeviceList'
-
-const API_BASE = import.meta.env.VITE_API_URL
-const WS_BASE = import.meta.env.VITE_WS_URL
+import { API_BASE, WS_BASE } from '../config'
 
 export default function Dashboard({ onLogout }) {
   const [devices, setDevices] = useState([])

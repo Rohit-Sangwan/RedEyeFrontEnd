@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from '../config'
 
 function authHeaders(json = false) {
   return {

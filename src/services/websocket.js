@@ -1,3 +1,5 @@
+import { WS_BASE } from '../config'
+
 class AdminWebSocket {
   constructor() {
     this.ws = null;
@@ -12,16 +14,11 @@ class AdminWebSocket {
       this.disconnect();
     }
 
-   const WS_BASE = import.meta.env.VITE_WS_URL
+    if (!WS_BASE) {
+      throw new Error('VITE_WS_URL is not defined')
+    }
 
-        if (!WS_BASE) {
-        throw new Error('VITE_WS_URL is not defined')
-        }
-
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-        const wsHost = WS_BASE.replace(/^ws[s]?:\/\//, '')
-        const wsUrl = `${protocol}//${wsHost}/admin?token=${token}`
-        this.ws = new WebSocket(wsUrl)
+    this.ws = new WebSocket(`${WS_BASE}/admin?token=${token}`)
 
 
     this.ws.onopen = () => {

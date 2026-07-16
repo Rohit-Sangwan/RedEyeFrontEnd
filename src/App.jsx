@@ -5,8 +5,7 @@ import { SiTelegram } from 'react-icons/si'
 import Dashboard from './components/Dashboard'
 import DeviceDetail from './components/DeviceDetail'
 import Settings from './components/Settings'
-
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from './config'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'))

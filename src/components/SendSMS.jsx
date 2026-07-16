@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { FiClipboard, FiPhoneForwarded, FiSend } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from '../config'
 
 function authHeaders(extra = {}) {
   return {

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FiClipboard, FiMessageSquare, FiSearch, FiTrash2 } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from '../config'
 const INITIAL_LIMIT = 80
 const POLL_LIMIT = 50
 const SMS_POLL_MS = 2000

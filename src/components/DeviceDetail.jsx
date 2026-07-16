@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast'
 import SMSInbox from './SMSInbox'
 import SendSMS from './SendSMS'
 
-const API_BASE = import.meta.env.VITE_API_URL
+import { API_BASE } from '../config'
 const DEVICE_POLL_MS = 5000
 
 function authHeaders(extra = {}) {
