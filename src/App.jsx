@@ -5,10 +5,15 @@ import { SiTelegram } from 'react-icons/si'
 import Dashboard from './components/Dashboard'
 import DeviceDetail from './components/DeviceDetail'
 import Settings from './components/Settings'
+import OwnerPanel from './components/OwnerPanel'
 import { API_BASE } from './config'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'))
+  const [isExpired, setIsExpired] = useState(false)
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
+  })
 
   useEffect(() => {
     localStorage.setItem('redeye_theme', 'dark')
@@ -20,17 +25,26 @@ function App() {
     const token = localStorage.getItem('token')
     if (!token) return setIsAuthenticated(false)
     fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => {
-        if (!res.ok) throw new Error('expired')
+      .then(async res => {
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          if (data.expired) { setIsExpired(true); setIsAuthenticated(false); return }
+          throw new Error('expired')
+        }
+        setUser(data.user)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        setIsExpired(false)
         setIsAuthenticated(true)
       })
       .catch(() => handleLogout(false))
   }, [])
 
-  const handleLogin = (token, user) => {
+  const handleLogin = (token, userData) => {
     localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('user', JSON.stringify(userData))
     localStorage.setItem('redeye_theme', 'dark')
+    setUser(userData)
+    setIsExpired(false)
     setIsAuthenticated(true)
     toast.success('ROOT ACCESS GRANTED')
   }
@@ -38,7 +52,9 @@ function App() {
   const handleLogout = (notify = true) => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    setUser(null)
     setIsAuthenticated(false)
+    setIsExpired(false)
     if (notify) toast.success('SESSION TERMINATED')
   }
 
@@ -59,13 +75,60 @@ function App() {
       />
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          <Route path="/login" element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/" />} />
-          <Route path="/" element={isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/settings" element={isAuthenticated ? <Settings onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/device/:deviceId" element={isAuthenticated ? <DeviceDetail onLogout={handleLogout} /> : <Navigate to="/login" />} />
+          <Route path="/login" element={
+            !isAuthenticated
+              ? <LoginPage onLogin={handleLogin} />
+              : <Navigate to="/" />
+          } />
+          <Route path="/" element={
+            isAuthenticated
+              ? <Dashboard onLogout={handleLogout} user={user} />
+              : <Navigate to="/login" />
+          } />
+          <Route path="/settings" element={
+            isAuthenticated
+              ? <Settings onLogout={handleLogout} />
+              : <Navigate to="/login" />
+          } />
+          <Route path="/owner" element={
+            isAuthenticated && user?.role === 'owner'
+              ? <OwnerPanel onLogout={handleLogout} />
+              : <Navigate to="/" />
+          } />
+          <Route path="/device/:deviceId" element={
+            isAuthenticated
+              ? <DeviceDetail onLogout={handleLogout} />
+              : <Navigate to="/login" />
+          } />
         </Routes>
       </BrowserRouter>
+
+      {isExpired && <ExpiredScreen onRetry={() => { setIsExpired(false); window.location.href = '/login' }} />}
     </>
+  )
+}
+
+function ExpiredScreen({ onRetry }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070c] p-4">
+      <div className="cyber-card w-full max-w-md p-8 text-center">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10 font-mono text-3xl font-black text-red-300">!</div>
+        <h1 className="mb-3 text-2xl font-black text-red-300">PLAN EXPIRED</h1>
+        <p className="muted mb-6 text-sm">Your admin access has expired. Please repurchase to continue using RedEye.</p>
+        <a
+          href="https://t.me/NullCoder_404"
+          target="_blank"
+          rel="noreferrer"
+          className="telegram-btn mb-4 w-full py-3"
+        >
+          <SiTelegram className="text-lg" />
+          <span>CONTACT ON TELEGRAM</span>
+        </a>
+        <button onClick={onRetry} className="cyber-btn w-full py-3">
+          RETRY LOGIN
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -88,7 +151,13 @@ function LoginPage({ onLogin }) {
         body: JSON.stringify({ email, password })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Authentication failed')
+      if (!res.ok) {
+        if (data.expired) {
+          toast.error('YOUR PLAN HAS EXPIRED. PLEASE REPURCHASE.')
+          return
+        }
+        throw new Error(data.error || 'Authentication failed')
+      }
       onLogin(data.token, data.user)
     } catch (err) {
       toast.error(`ACCESS DENIED: ${err.message || 'server unreachable'}`)

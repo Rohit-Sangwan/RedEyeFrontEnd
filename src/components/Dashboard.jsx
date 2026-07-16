@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast'
 import DeviceList from './DeviceList'
 import { API_BASE, WS_BASE } from '../config'
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, user }) {
   const [devices, setDevices] = useState([])
   const [loading, setLoading] = useState(true)
   const wsRef = useRef(null)
@@ -62,6 +62,7 @@ export default function Dashboard({ onLogout }) {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            {user?.role === 'owner' && <Link to="/owner" className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm font-bold text-amber-100 transition hover:bg-amber-400/20"><FiShield /> Owner Panel</Link>}
             <Link to="/settings" className="cyber-btn"><FiSettings /> Settings</Link>
             <button onClick={onLogout} className="danger-btn"><FiLogOut /> Logout</button>
           </div>
