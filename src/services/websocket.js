@@ -18,7 +18,9 @@ class AdminWebSocket {
         throw new Error('VITE_WS_URL is not defined')
         }
 
-        const wsUrl = `${WS_BASE}/admin?token=${token}`
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+        const wsHost = WS_BASE.replace(/^ws[s]?:\/\//, '')
+        const wsUrl = `${protocol}//${wsHost}/admin?token=${token}`
         this.ws = new WebSocket(wsUrl)
 
 
