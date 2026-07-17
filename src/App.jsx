@@ -11,6 +11,7 @@ import { API_BASE } from './config'
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'))
   const [isExpired, setIsExpired] = useState(false)
+  const [isSuspended, setIsSuspended] = useState(false)
   const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
@@ -29,12 +30,14 @@ function App() {
       .then(async res => {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
+          if (data.suspended) { setIsSuspended(true); setIsAuthenticated(false); return }
           if (data.expired) { setIsExpired(true); setIsAuthenticated(false); return }
           throw new Error('expired')
         }
         setUser(data.user)
         localStorage.setItem('user', JSON.stringify(data.user))
         setIsExpired(false)
+        setIsSuspended(false)
         setIsAuthenticated(true)
       })
       .catch(() => handleLogout(false))
@@ -46,8 +49,15 @@ function App() {
     localStorage.setItem('redeye_theme', 'dark')
     setUser(userData)
     setIsExpired(false)
+    setIsSuspended(false)
     setIsAuthenticated(true)
     toast.success('ROOT ACCESS GRANTED')
+
+    if (userData.suspended) {
+      setIsSuspended(true)
+      setIsAuthenticated(false)
+      return
+    }
 
     if (userData.role !== 'owner' && userData.expires_at && new Date(userData.expires_at) < new Date()) {
       setShowLoginPopup(true)
@@ -113,6 +123,7 @@ function App() {
       </BrowserRouter>
 
       {isExpired && <ExpiredScreen onRetry={() => { setIsExpired(false); window.location.href = '/login' }} />}
+      {isSuspended && <SuspendedScreen onRetry={() => { setIsSuspended(false); handleLogout(false) }} />}
       {showLoginPopup && <LoginPopup />}
     </>
   )
@@ -158,6 +169,30 @@ function ExpiredScreen({ onRetry }) {
   )
 }
 
+function SuspendedScreen({ onRetry }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070c] p-4">
+      <div className="cyber-card w-full max-w-md p-8 text-center">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10 font-mono text-3xl font-black text-red-300">⛔</div>
+        <h1 className="mb-3 text-2xl font-black text-red-300">ACCOUNT SUSPENDED</h1>
+        <p className="muted mb-6 text-sm">Your account has been suspended by the owner. Contact the owner for more information.</p>
+        <a
+          href="https://t.me/NullCoder_404"
+          target="_blank"
+          rel="noreferrer"
+          className="telegram-btn mb-4 w-full py-3"
+        >
+          <SiTelegram className="text-lg" />
+          <span>CONTACT OWNER</span>
+        </a>
+        <button onClick={onRetry} className="cyber-btn w-full py-3">
+          BACK TO LOGIN
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function LoginMatrix() {
   return <div className="login-matrix" aria-hidden="true">{Array.from({ length: 46 }).map((_, i) => <i key={i} style={{ left: `${(i * 7) % 100}%`, animationDelay: `${(i % 9) * -0.55}s` }}>{i % 3 === 0 ? 'REDEYE' : i % 3 === 1 ? 'ACCESS' : '0101'}</i>)}</div>
 }
@@ -178,6 +213,10 @@ function LoginPage({ onLogin }) {
       })
       const data = await res.json()
       if (!res.ok) {
+        if (data.suspended) {
+          toast.error('YOUR ACCOUNT HAS BEEN SUSPENDED.')
+          return
+        }
         if (data.expired) {
           toast.error('YOUR PLAN HAS EXPIRED. PLEASE REPURCHASE.')
           return

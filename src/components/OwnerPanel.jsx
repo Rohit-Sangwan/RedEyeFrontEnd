@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiArrowLeft, FiCopy, FiPlus, FiShield, FiTrash2, FiUser, FiClock, FiCheck, FiX } from 'react-icons/fi'
+import { FiArrowLeft, FiCopy, FiPlus, FiShield, FiTrash2, FiUser, FiClock, FiCheck, FiX, FiDollarSign, FiSmartphone, FiMessageSquare, FiActivity } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
 import { API_BASE } from '../config'
@@ -18,9 +18,20 @@ const EXPIRY_OPTIONS = [
   { value: 12, label: '1 Year' }
 ]
 
+const TIER_OPTIONS = [
+  { value: 'basic', label: 'Basic', price: 299 },
+  { value: 'premium', label: 'Premium', price: 599 },
+  { value: 'enterprise', label: 'Enterprise', price: 999 }
+]
+
 function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function daysRemaining(iso) {
@@ -32,34 +43,43 @@ function daysRemaining(iso) {
 export default function OwnerPanel({ onLogout }) {
   const navigate = useNavigate()
   const [admins, setAdmins] = useState([])
+  const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
   const [newExpiry, setNewExpiry] = useState(3)
+  const [newTier, setNewTier] = useState('basic')
   const [creating, setCreating] = useState(false)
   const [generatedPassword, setGeneratedPassword] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editExpiry, setEditExpiry] = useState(3)
+  const [editTier, setEditTier] = useState('basic')
+  const [expandedStats, setExpandedStats] = useState(null)
 
-  const fetchAdmins = async () => {
+  const fetchAll = async () => {
     try {
-      const res = await fetch(`${API_BASE}/owner/admins`, { headers: authHeaders() })
-      if (res.status === 403) {
+      const [adminsRes, statsRes] = await Promise.all([
+        fetch(`${API_BASE}/owner/admins`, { headers: authHeaders() }),
+        fetch(`${API_BASE}/owner/stats`, { headers: authHeaders() })
+      ])
+      if (adminsRes.status === 403) {
         toast.error('OWNER ACCESS REQUIRED')
         navigate('/')
         return
       }
-      const data = await res.json()
-      if (data.success) setAdmins(data.admins || [])
+      const adminsData = await adminsRes.json()
+      const statsData = await statsRes.json()
+      if (adminsData.success) setAdmins(adminsData.admins || [])
+      if (statsData.success) setStats(statsData)
     } catch {
-      toast.error('FAILED TO LOAD ADMINS')
+      toast.error('FAILED TO LOAD DATA')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { fetchAdmins() }, [])
+  useEffect(() => { fetchAll() }, [])
 
   const createAdmin = async () => {
     if (!newEmail.trim()) return toast.error('EMAIL REQUIRED')
@@ -68,7 +88,7 @@ export default function OwnerPanel({ onLogout }) {
       const res = await fetch(`${API_BASE}/owner/admins`, {
         method: 'POST',
         headers: authHeaders(true),
-        body: JSON.stringify({ email: newEmail.trim(), displayName: newName.trim() || null, expiryMonths: newExpiry })
+        body: JSON.stringify({ email: newEmail.trim(), displayName: newName.trim() || null, expiryMonths: newExpiry, pricingTier: newTier })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed')
@@ -76,7 +96,8 @@ export default function OwnerPanel({ onLogout }) {
       setNewEmail('')
       setNewName('')
       setNewExpiry(3)
-      fetchAdmins()
+      setNewTier('basic')
+      fetchAll()
       toast.success('ADMIN CREATED')
     } catch (err) {
       toast.error(`CREATE FAILED: ${err.message}`)
@@ -85,20 +106,36 @@ export default function OwnerPanel({ onLogout }) {
     }
   }
 
-  const updateExpiry = async (id) => {
+  const updateAdmin = async (id) => {
     try {
       const res = await fetch(`${API_BASE}/owner/admins/${id}`, {
         method: 'PATCH',
         headers: authHeaders(true),
-        body: JSON.stringify({ expiryMonths: editExpiry })
+        body: JSON.stringify({ expiryMonths: editExpiry, pricingTier: editTier })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed')
       setEditingId(null)
-      fetchAdmins()
-      toast.success('EXPIRY UPDATED')
+      fetchAll()
+      toast.success('ADMIN UPDATED')
     } catch (err) {
       toast.error(`UPDATE FAILED: ${err.message}`)
+    }
+  }
+
+  const toggleSuspend = async (id, current) => {
+    try {
+      const res = await fetch(`${API_BASE}/owner/admins/${id}`, {
+        method: 'PATCH',
+        headers: authHeaders(true),
+        body: JSON.stringify({ suspended: !current })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed')
+      fetchAll()
+      toast.success(current ? 'ADMIN RESUMED' : 'ADMIN SUSPENDED')
+    } catch (err) {
+      toast.error(`FAILED: ${err.message}`)
     }
   }
 
@@ -111,7 +148,7 @@ export default function OwnerPanel({ onLogout }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed')
-      fetchAdmins()
+      fetchAll()
       toast.success('ADMIN DELETED')
     } catch (err) {
       toast.error(`DELETE FAILED: ${err.message}`)
@@ -120,8 +157,11 @@ export default function OwnerPanel({ onLogout }) {
 
   const copyPassword = (pw) => {
     navigator.clipboard.writeText(pw)
-    toast.success('PASSWORD COPIED')
+    toast.success('COPIED')
   }
+
+  const o = stats?.overview || {}
+  const r = stats?.revenue || {}
 
   return (
     <div className="cyber-bg min-h-screen">
@@ -145,7 +185,50 @@ export default function OwnerPanel({ onLogout }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl p-6">
+      <main className="mx-auto max-w-6xl p-6">
+        {/* REVENUE DASHBOARD */}
+        {stats && (
+          <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-4">
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiUser className="text-emerald-400" /> Total Admins
+              </div>
+              <div className="text-3xl font-black text-slate-100">{o.admins || 0}</div>
+              <div className="mt-1 flex gap-2 text-xs">
+                <span className="text-emerald-400">{o.active || 0} active</span>
+                <span className="text-yellow-400">{o.suspended || 0} suspended</span>
+                <span className="text-red-400">{o.expired || 0} expired</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-4">
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiDollarSign className="text-emerald-400" /> Est. Revenue
+              </div>
+              <div className="text-3xl font-black text-emerald-300">₹{r.estimated_monthly?.toLocaleString('en-IN') || 0}</div>
+              <div className="mt-1 text-xs text-slate-500">per month</div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-4">
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiMessageSquare className="text-emerald-400" /> Total SMS
+              </div>
+              <div className="text-3xl font-black text-slate-100">{o.total_sms?.toLocaleString('en-IN') || 0}</div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-4">
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <FiSmartphone className="text-emerald-400" /> Devices
+              </div>
+              <div className="text-3xl font-black text-slate-100">{o.total_devices || 0}</div>
+              <div className="mt-1 flex gap-2 text-xs">
+                <span className="text-emerald-400">{o.online_devices || 0} online</span>
+                <span className="text-slate-500">{(o.total_devices || 0) - (o.online_devices || 0)} offline</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {generatedPassword && (
           <div className="mb-6 rounded-2xl border border-emerald-400/40 bg-emerald-400/5 p-5">
             <div className="mb-3 flex items-center justify-between">
@@ -187,6 +270,27 @@ export default function OwnerPanel({ onLogout }) {
               </label>
             </div>
             <div className="mt-3">
+              <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-400">Pricing Tier</span>
+              <div className="grid grid-cols-3 gap-2">
+                {TIER_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-500/20 bg-slate-950/70 p-3 text-sm text-slate-200 hover:bg-emerald-500/10"
+                  >
+                    <input
+                      type="radio"
+                      name="newTier"
+                      value={opt.value}
+                      checked={newTier === opt.value}
+                      onChange={(e) => setNewTier(e.target.value)}
+                      className="h-4 w-4 accent-emerald-400"
+                    />
+                    <span>{opt.label} <span className="text-xs text-slate-500">₹{opt.price}/mo</span></span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3">
               <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-400">Expiry</span>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 {EXPIRY_OPTIONS.map((opt) => (
@@ -225,21 +329,24 @@ export default function OwnerPanel({ onLogout }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-500/20 text-left text-xs uppercase tracking-wider text-slate-400">
-                  <th className="px-5 py-3 font-bold">ADMIN</th>
-                  <th className="px-5 py-3 font-bold">ROLE</th>
-                  <th className="px-5 py-3 font-bold">CREATED</th>
-                  <th className="px-5 py-3 font-bold">EXPIRES</th>
-                  <th className="px-5 py-3 font-bold">STATUS</th>
-                  <th className="px-5 py-3 font-bold">ACTIONS</th>
+                  <th className="px-4 py-3 font-bold">ADMIN</th>
+                  <th className="px-4 py-3 font-bold">TIER</th>
+                  <th className="px-4 py-3 font-bold">EXPIRES</th>
+                  <th className="px-4 py-3 font-bold">STATUS</th>
+                  <th className="px-4 py-3 font-bold">USAGE</th>
+                  <th className="px-4 py-3 font-bold">ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {admins.map((admin, i) => {
                   const remaining = daysRemaining(admin.expires_at)
                   const isExpired = admin.expired
+                  const isSuspended = admin.suspended && !admin.is_owner
+                  const tierInfo = TIER_OPTIONS.find(t => t.value === admin.pricing_tier) || TIER_OPTIONS[0]
+                  const statsExpanded = expandedStats === admin.id
                   return (
-                    <tr key={admin.id} className={`border-b border-emerald-500/10 ${i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
-                      <td className="px-5 py-3">
+                    <tr key={admin.id} className={`border-b border-emerald-500/10 ${isSuspended ? 'bg-red-950/10 opacity-60' : i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-400/10 text-emerald-300">
                             <FiUser />
@@ -250,15 +357,18 @@ export default function OwnerPanel({ onLogout }) {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${admin.is_owner ? 'bg-amber-400/15 text-amber-300' : 'bg-emerald-400/15 text-emerald-300'}`}>
-                          {admin.role?.toUpperCase()}
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                          admin.pricing_tier === 'enterprise' ? 'bg-purple-400/15 text-purple-300' :
+                          admin.pricing_tier === 'premium' ? 'bg-amber-400/15 text-amber-300' :
+                          'bg-slate-400/15 text-slate-300'
+                        }`}>
+                          {tierInfo.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-slate-400">{formatDate(admin.created_at)}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         {editingId === admin.id ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex flex-col gap-1">
                             <select
                               value={editExpiry}
                               onChange={(e) => setEditExpiry(Number(e.target.value))}
@@ -266,16 +376,27 @@ export default function OwnerPanel({ onLogout }) {
                             >
                               {EXPIRY_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
-                            <button onClick={() => updateExpiry(admin.id)} className="rounded p-1 text-emerald-400 hover:bg-emerald-500/10"><FiCheck /></button>
-                            <button onClick={() => setEditingId(null)} className="rounded p-1 text-red-400 hover:bg-red-500/10"><FiX /></button>
+                            <select
+                              value={editTier}
+                              onChange={(e) => setEditTier(e.target.value)}
+                              className="rounded-lg border border-emerald-500/30 bg-black/40 px-2 py-1 text-xs text-slate-100"
+                            >
+                              {TIER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label} ₹{o.price}/mo</option>)}
+                            </select>
+                            <div className="flex gap-1">
+                              <button onClick={() => updateAdmin(admin.id)} className="rounded p-1 text-emerald-400 hover:bg-emerald-500/10"><FiCheck /></button>
+                              <button onClick={() => setEditingId(null)} className="rounded p-1 text-red-400 hover:bg-red-500/10"><FiX /></button>
+                            </div>
                           </div>
                         ) : (
                           <span className="text-slate-300">{formatDate(admin.expires_at)}</span>
                         )}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         {admin.is_owner ? (
                           <span className="status-pill online">OWNER</span>
+                        ) : isSuspended ? (
+                          <span className="rounded-full bg-red-400/15 px-3 py-1 text-xs font-bold text-red-300">SUSPENDED</span>
                         ) : isExpired ? (
                           <span className="rounded-full bg-red-400/15 px-3 py-1 text-xs font-bold text-red-300">EXPIRED</span>
                         ) : remaining !== null && remaining <= 7 ? (
@@ -284,15 +405,53 @@ export default function OwnerPanel({ onLogout }) {
                           <span className="status-pill online">ACTIVE</span>
                         )}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
+                        {!admin.is_owner ? (
+                          <button
+                            onClick={() => setExpandedStats(statsExpanded ? null : admin.id)}
+                            className="flex items-center gap-2 rounded-lg border border-emerald-500/20 px-2 py-1 text-xs text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                          >
+                            <FiActivity />
+                            <span>{admin.sms_total || 0} SMS</span>
+                            <span>/ {admin.devices_total || 0} DEV</span>
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-500">—</span>
+                        )}
+                        {statsExpanded && (
+                          <div className="mt-2 rounded-lg border border-emerald-500/15 bg-black/30 p-3 text-xs text-slate-400">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div><span className="text-slate-500">SMS Sent:</span> <span className="text-emerald-300">{admin.sms_sent || 0}</span></div>
+                              <div><span className="text-slate-500">SMS Received:</span> <span className="text-emerald-300">{admin.sms_received || 0}</span></div>
+                              <div><span className="text-slate-500">Devices Online:</span> <span className="text-emerald-300">{admin.devices_online || 0}/{admin.devices_total || 0}</span></div>
+                              <div><span className="text-slate-500">API Keys:</span> <span className="text-emerald-300">{admin.api_keys || 0}</span></div>
+                              <div><span className="text-slate-500">Last Login:</span> <span className="text-slate-300">{formatDateTime(admin.last_login)}</span></div>
+                              <div><span className="text-slate-500">Created:</span> <span className="text-slate-300">{formatDate(admin.created_at)}</span></div>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
                         {!admin.is_owner && (
-                          <div className="flex gap-1">
+                          <div className="flex flex-wrap gap-1">
                             <button
-                              onClick={() => { setEditingId(admin.id); setEditExpiry(3) }}
-                              className="rounded-lg border border-emerald-500/30 px-2 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10"
+                              onClick={() => toggleSuspend(admin.id, admin.suspended)}
+                              className={`rounded-lg border px-2 py-1 text-xs font-bold ${
+                                admin.suspended
+                                  ? 'border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10'
+                                  : 'border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/10'
+                              }`}
                             >
-                              <FiClock /> EDIT
+                              {admin.suspended ? 'RESUME' : 'SUSPEND'}
                             </button>
+                            {editingId === admin.id ? null : (
+                              <button
+                                onClick={() => { setEditingId(admin.id); setEditExpiry(3); setEditTier(admin.pricing_tier || 'basic') }}
+                                className="rounded-lg border border-emerald-500/30 px-2 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <FiClock /> EDIT
+                              </button>
+                            )}
                             <button
                               onClick={() => deleteAdmin(admin.id, admin.email)}
                               className="rounded-lg border border-red-500/30 px-2 py-1 text-xs text-red-300 hover:bg-red-500/10"
