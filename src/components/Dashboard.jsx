@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiLogOut, FiSettings, FiZap, FiShield } from 'react-icons/fi'
+import { FiLogOut, FiSettings, FiZap, FiShield, FiDollarSign, FiSmartphone } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import DeviceList from './DeviceList'
+import BalanceTab from './BalanceTab'
 import { API_BASE, WS_BASE } from '../config'
 
 export default function Dashboard({ onLogout, user }) {
   const [devices, setDevices] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('devices')
   const wsRef = useRef(null)
 
   const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
@@ -76,8 +78,30 @@ export default function Dashboard({ onLogout, user }) {
           <Stat label="OFFLINE" value={devices.length - online} />
           <Stat label="FAVORITES" value={fav} />
         </div>
-        <div className="mb-4 flex items-center gap-2 text-sm muted"><FiZap /> Realtime device matrix. Use Settings for API keys, Telegram, and wake-all logs.</div>
-        <DeviceList devices={devices} loading={loading} onUpdated={onDeviceUpdated} onDeleted={onDeviceDeleted} />
+
+        <div className="mb-4 flex gap-2">
+          <button
+            onClick={() => setActiveTab('devices')}
+            className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${activeTab === 'devices' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          >
+            <FiSmartphone className="mr-1 inline" /> DEVICES
+          </button>
+          <button
+            onClick={() => setActiveTab('balances')}
+            className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${activeTab === 'balances' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          >
+            <FiDollarSign className="mr-1 inline" /> BALANCES
+          </button>
+        </div>
+
+        {activeTab === 'devices' ? (
+          <>
+            <div className="mb-4 flex items-center gap-2 text-sm muted"><FiZap /> Realtime device matrix. Use Settings for API keys, Telegram, and wake-all logs.</div>
+            <DeviceList devices={devices} loading={loading} onUpdated={onDeviceUpdated} onDeleted={onDeviceDeleted} />
+          </>
+        ) : (
+          <BalanceTab />
+        )}
       </main>
     </div>
   )
