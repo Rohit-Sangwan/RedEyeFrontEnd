@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield } from 'react-icons/fi'
+import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield, FiDownload } from 'react-icons/fi'
+import { SiTelegram } from 'react-icons/si'
 import { toast } from 'react-hot-toast'
 
 import { API_BASE } from '../config'
@@ -273,9 +274,19 @@ export default function Settings({ onLogout }) {
             <FiArrowLeft /> Back
           </button>
 
-          <div className="text-right">
-            <h1 className="text-xl font-black text-emerald-300">SYSTEM SETTINGS</h1>
-            <p className="text-xs text-slate-400">Secure admin controls</p>
+          <div className="flex items-center gap-2">
+            <a
+              href="https://t.me/RedEyePayloadBot"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-sm font-bold text-sky-200 hover:bg-sky-400/20"
+            >
+              <FiDownload /> PAYLOADS
+            </a>
+            <div className="text-right">
+              <h1 className="text-xl font-black text-emerald-300">SYSTEM SETTINGS</h1>
+              <p className="text-xs text-slate-400">Secure admin controls</p>
+            </div>
           </div>
         </div>
       </header>

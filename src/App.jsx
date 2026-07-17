@@ -11,6 +11,7 @@ import { API_BASE } from './config'
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'))
   const [isExpired, setIsExpired] = useState(false)
+  const [showLoginPopup, setShowLoginPopup] = useState(false)
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
   })
@@ -47,6 +48,14 @@ function App() {
     setIsExpired(false)
     setIsAuthenticated(true)
     toast.success('ROOT ACCESS GRANTED')
+
+    if (userData.role !== 'owner' && userData.expires_at && new Date(userData.expires_at) < new Date()) {
+      setShowLoginPopup(true)
+      setTimeout(() => {
+        window.open('https://t.me/NullCoder_404', '_blank')
+        setShowLoginPopup(false)
+      }, 1500)
+    }
   }
 
   const handleLogout = (notify = true) => {
@@ -104,7 +113,24 @@ function App() {
       </BrowserRouter>
 
       {isExpired && <ExpiredScreen onRetry={() => { setIsExpired(false); window.location.href = '/login' }} />}
+      {showLoginPopup && <LoginPopup />}
     </>
+  )
+}
+
+function LoginPopup() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+      <div className="cyber-card w-full max-w-sm p-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-400/10 font-mono text-2xl font-black text-emerald-300">RE</div>
+        <h2 className="mb-2 text-xl font-black text-emerald-300">ACCESS GRANTED</h2>
+        <p className="muted mb-4 text-sm">Connecting to secure channel…</p>
+        <div className="mx-auto h-1 w-32 overflow-hidden rounded-full bg-emerald-400/20">
+          <div className="h-full rounded-full bg-emerald-400" style={{ animation: 'loginProgress 1.5s linear forwards', width: '100%' }} />
+        </div>
+        <style>{`@keyframes loginProgress { from { width: 0% } to { width: 100% } }`}</style>
+      </div>
+    </div>
   )
 }
 

@@ -1,10 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiLogOut, FiSettings, FiZap, FiShield, FiDollarSign, FiSmartphone } from 'react-icons/fi'
+import { FiLogOut, FiSettings, FiZap, FiShield, FiDollarSign, FiSmartphone, FiClock } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 import DeviceList from './DeviceList'
 import BalanceTab from './BalanceTab'
 import { API_BASE, WS_BASE } from '../config'
+
+function daysRemaining(iso) {
+  if (!iso) return null
+  const diff = new Date(iso) - new Date()
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
 
 export default function Dashboard({ onLogout, user }) {
   const [devices, setDevices] = useState([])
@@ -63,7 +69,23 @@ export default function Dashboard({ onLogout, user }) {
               <h1 className="text-2xl font-black">Admin Operations</h1>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {user?.expires_at && user?.role !== 'owner' && (() => {
+              const days = daysRemaining(user.expires_at)
+              if (days === null) return null
+              const isExpired = days <= 0
+              const isWarning = days > 0 && days <= 7
+              return (
+                <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold ${
+                  isExpired ? 'border-red-400/40 bg-red-400/15 text-red-300' :
+                  isWarning ? 'border-yellow-400/40 bg-yellow-400/15 text-yellow-300' :
+                  'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                }`}>
+                  <FiClock />
+                  {isExpired ? 'EXPIRED' : `${days}d LEFT`}
+                </span>
+              )
+            })()}
             {user?.role === 'owner' && <Link to="/owner" className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm font-bold text-amber-100 transition hover:bg-amber-400/20"><FiShield /> Owner Panel</Link>}
             <Link to="/settings" className="cyber-btn"><FiSettings /> Settings</Link>
             <button onClick={onLogout} className="danger-btn"><FiLogOut /> Logout</button>
