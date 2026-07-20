@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { Toaster, toast } from 'react-hot-toast'
 import { SiTelegram } from 'react-icons/si'
 import { FiAlertTriangle, FiX } from 'react-icons/fi'
@@ -100,6 +100,11 @@ function App() {
           <Route path="/login" element={
             !isAuthenticated
               ? <LoginPage onLogin={handleLogin} />
+              : <Navigate to="/" />
+          } />
+          <Route path="/signup" element={
+            !isAuthenticated
+              ? <SignupPage onLogin={handleLogin} />
               : <Navigate to="/" />
           } />
           <Route path="/" element={
@@ -312,6 +317,79 @@ function LoginPage({ onLogin }) {
             <SiTelegram className="text-lg" aria-hidden="true" />
             <span>GET ADMIN KEY</span>
           </a>
+          <p className="text-center text-sm text-slate-400 mt-4">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+              Sign Up Free
+            </Link>
+          </p>
+        </form>
+      </div>
+      {errorModal && <LoginErrorModal message={errorModal} onClose={() => setErrorModal(null)} />}
+    </div>
+  )
+}
+
+function SignupPage({ onLogin }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [errorModal, setErrorModal] = useState(null)
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+    setLoading(true)
+    setErrorModal(null)
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, display_name: displayName })
+      })
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        setErrorModal('Server unreachable. The backend may be starting up — try again in a few seconds.')
+        return
+      }
+      if (!res.ok) {
+        setErrorModal(data.error || 'Signup failed. Please try again.')
+        return
+      }
+      onLogin(data.token, data.user)
+    } catch (err) {
+      setErrorModal('Cannot connect to server. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="cyber-bg flex items-center justify-center p-4">
+      <LoginMatrix />
+      <div className="login-shell cyber-card w-full max-w-md p-8">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-400/10 font-mono text-2xl font-black text-emerald-300 shadow-lg shadow-emerald-900/30">RE</div>
+          <p className="terminal-title">create secure account</p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight">Sign Up</h1>
+          <p className="muted mt-2 text-sm">1-day free trial — no payment required</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <input type="text" name="fs_signup_name" autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="display name (optional)" className="cyber-input" />
+          <input type="email" name="fs_signup_email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} placeholder="email address" className="cyber-input" required />
+          <input type="password" name="fs_signup_password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="create password (8+ chars)" className="cyber-input" required minLength={8} />
+          <button disabled={loading} className="cyber-btn w-full py-3">
+            {loading ? 'CREATING ACCOUNT…' : 'START FREE TRIAL'}
+          </button>
+          <p className="text-center text-sm text-slate-400">
+            Already have an account?{' '}
+            <Link to="/login" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+              Login
+            </Link>
+          </p>
         </form>
       </div>
       {errorModal && <LoginErrorModal message={errorModal} onClose={() => setErrorModal(null)} />}
