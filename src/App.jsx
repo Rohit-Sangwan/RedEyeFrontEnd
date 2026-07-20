@@ -250,41 +250,7 @@ function LoginPage({ onLogin }) {
   }
 
   if (errorModal) {
-  if (errorModal) {
     return (
-      <div className="cyber-bg flex items-center justify-center p-4">
-        <LoginMatrix />
-        <div className="cyber-card w-full max-w-sm p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10">
-            <FiAlertTriangle className="text-red-300 text-2xl" />
-          </div>
-          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">Access Denied</h2>
-          <div className="my-4 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-3">
-            <p className="text-sm text-red-200 font-mono leading-relaxed text-left">{errorModal}</p>
-          </div>
-          <div className="space-y-2">
-            <button
-              onClick={() => setErrorModal(null)}
-              className="w-full rounded-xl bg-red-400/10 border border-red-400/30 py-2.5 text-sm font-bold text-red-300 hover:bg-red-400/20 transition-all"
-            >
-              TRY AGAIN
-            </button>
-            <a
-              href="https://t.me/NullCoder_404"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
-            >
-              <SiTelegram className="text-base" />
-              CONTACT SUPPORT
-            </a>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return (
       <div className="cyber-bg flex items-center justify-center p-4">
         <LoginMatrix />
         <div className="cyber-card w-full max-w-sm p-8 text-center">
@@ -360,32 +326,45 @@ function SignupPage({ onLogin }) {
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorModal, setErrorModal] = useState(null)
+  const [fieldError, setFieldError] = useState('')
+
+  function validateFields() {
+    if (!email.trim()) { setFieldError('Email address is required.'); return false }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('Please enter a valid email address.'); return false }
+    if (!password) { setFieldError('Password is required.'); return false }
+    if (password.length < 8) { setFieldError('Password must be at least 8 characters.'); return false }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) { setFieldError('Password must contain at least one uppercase letter and one number.'); return false }
+    setFieldError('')
+    return true
+  }
 
   const handleSubmit = async e => {
     e.preventDefault()
+    if (!validateFields()) return
     setLoading(true)
     setErrorModal(null)
+    setFieldError('')
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, display_name: displayName })
+        body: JSON.stringify({ email: email.trim(), password, display_name: displayName.trim() })
       })
       const text = await res.text()
       let data
       try {
         data = JSON.parse(text)
       } catch {
-        setErrorModal('Server unreachable. The backend may be starting up — try again in a few seconds.')
+        setErrorModal({ message: 'Server unreachable. The backend may be starting up — try again in a few seconds.' })
         return
       }
       if (!res.ok) {
-        setErrorModal(data.error || 'Signup failed. Please try again.')
+        setErrorModal({ message: data.error || 'Signup failed. Please try again.', hint: data.hint || null })
         return
       }
       onLogin(data.token, data.user)
     } catch (err) {
-      setErrorModal('Cannot connect to server. Please try again later.')
+      setErrorModal({ message: 'Cannot connect to server. Please try again later.' })
     } finally {
       setLoading(false)
     }
@@ -403,8 +382,18 @@ function SignupPage({ onLogin }) {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <input type="text" name="fs_signup_name" autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="display name (optional)" className="cyber-input" />
-          <input type="email" name="fs_signup_email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} placeholder="email address" className="cyber-input" required />
-          <input type="password" name="fs_signup_password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="create password (8+ chars)" className="cyber-input" required minLength={8} />
+          <div>
+            <input type="email" name="fs_signup_email" autoComplete="username" value={email} onChange={e=>{setEmail(e.target.value); setFieldError('')}} placeholder="email address" className="cyber-input" required />
+          </div>
+          <div>
+            <input type="password" name="fs_signup_password" autoComplete="new-password" value={password} onChange={e=>{setPassword(e.target.value); setFieldError('')}} placeholder="create password (8+ chars)" className="cyber-input" required minLength={8} />
+            <p className="mt-1.5 text-xs text-slate-500">Must be 8+ characters with at least one uppercase letter and one number.</p>
+          </div>
+          {fieldError && (
+            <div className="rounded-xl border border-red-500/20 bg-red-950/30 px-3 py-2">
+              <p className="text-xs text-red-300 font-mono">{fieldError}</p>
+            </div>
+          )}
           <button disabled={loading} className="cyber-btn w-full py-3">
             {loading ? 'CREATING ACCOUNT…' : 'START FREE TRIAL'}
           </button>
