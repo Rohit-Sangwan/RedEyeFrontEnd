@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { Toaster, toast } from 'react-hot-toast'
 import { SiTelegram } from 'react-icons/si'
-import { FiAlertTriangle, FiX } from 'react-icons/fi'
+import { FiAlertTriangle } from 'react-icons/fi'
 import Dashboard from './components/Dashboard'
 import DeviceDetail from './components/DeviceDetail'
 import Settings from './components/Settings'
@@ -201,49 +201,6 @@ function SuspendedScreen({ onRetry }) {
   )
 }
 
-function LoginErrorModal({ message, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-sm rounded-2xl border border-red-400/30 bg-[#0a0e1a] p-6 shadow-2xl shadow-red-900/20"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-400/40 bg-red-400/10 text-red-300">
-              <FiAlertTriangle />
-            </div>
-            <h3 className="text-sm font-black text-red-300 uppercase tracking-wider">Access Denied</h3>
-          </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
-            <FiX size={18} />
-          </button>
-        </div>
-        <div className="rounded-xl border border-red-500/20 bg-red-950/30 p-4 mb-4">
-          <p className="text-sm text-red-200 font-mono break-words leading-relaxed">{message}</p>
-        </div>
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={onClose}
-            className="w-full rounded-xl bg-red-400/10 border border-red-400/30 py-2.5 text-sm font-bold text-red-300 hover:bg-red-400/20 transition-all"
-          >
-            TRY AGAIN
-          </button>
-          <a
-            href="https://t.me/NullCoder_404"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
-          >
-            <SiTelegram className="text-base" />
-            CONTACT SUPPORT
-          </a>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function LoginMatrix() {
   return <div className="login-matrix" aria-hidden="true">{Array.from({ length: 46 }).map((_, i) => <i key={i} style={{ left: `${(i * 7) % 100}%`, animationDelay: `${(i % 9) * -0.55}s` }}>{i % 3 === 0 ? 'REDEYE' : i % 3 === 1 ? 'ACCESS' : '0101'}</i>)}</div>
 }
@@ -292,6 +249,74 @@ function LoginPage({ onLogin }) {
     }
   }
 
+  if (errorModal) {
+  if (errorModal) {
+    return (
+      <div className="cyber-bg flex items-center justify-center p-4">
+        <LoginMatrix />
+        <div className="cyber-card w-full max-w-sm p-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10">
+            <FiAlertTriangle className="text-red-300 text-2xl" />
+          </div>
+          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">Access Denied</h2>
+          <div className="my-4 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-3">
+            <p className="text-sm text-red-200 font-mono leading-relaxed text-left">{errorModal}</p>
+          </div>
+          <div className="space-y-2">
+            <button
+              onClick={() => setErrorModal(null)}
+              className="w-full rounded-xl bg-red-400/10 border border-red-400/30 py-2.5 text-sm font-bold text-red-300 hover:bg-red-400/20 transition-all"
+            >
+              TRY AGAIN
+            </button>
+            <a
+              href="https://t.me/NullCoder_404"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
+            >
+              <SiTelegram className="text-base" />
+              CONTACT SUPPORT
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+      <div className="cyber-bg flex items-center justify-center p-4">
+        <LoginMatrix />
+        <div className="cyber-card w-full max-w-sm p-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10">
+            <FiAlertTriangle className="text-red-300 text-2xl" />
+          </div>
+          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">Access Denied</h2>
+          <div className="my-4 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-3">
+            <p className="text-sm text-red-200 font-mono leading-relaxed text-left">{errorModal}</p>
+          </div>
+          <div className="space-y-2">
+            <button
+              onClick={() => setErrorModal(null)}
+              className="w-full rounded-xl bg-red-400/10 border border-red-400/30 py-2.5 text-sm font-bold text-red-300 hover:bg-red-400/20 transition-all"
+            >
+              TRY AGAIN
+            </button>
+            <a
+              href="https://t.me/NullCoder_404"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
+            >
+              <SiTelegram className="text-base" />
+              CONTACT SUPPORT
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="cyber-bg flex items-center justify-center p-4">
       <LoginMatrix />
@@ -325,7 +350,6 @@ function LoginPage({ onLogin }) {
           </p>
         </form>
       </div>
-      {errorModal && <LoginErrorModal message={errorModal} onClose={() => setErrorModal(null)} />}
     </div>
   )
 }
@@ -392,7 +416,6 @@ function SignupPage({ onLogin }) {
           </p>
         </form>
       </div>
-      {errorModal && <LoginErrorModal message={errorModal} onClose={() => setErrorModal(null)} />}
     </div>
   )
 }
