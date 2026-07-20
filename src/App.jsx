@@ -235,7 +235,7 @@ function LoginPage({ onLogin }) {
           return
         }
         if (data.expired) {
-          onLogin(null, { expired: true, role: 'admin', expires_at: null })
+          setErrorModal(data.error || 'Your plan has expired. Please contact admin to renew.')
           return
         }
         setErrorModal(data.error || 'Authentication failed. Check your credentials and try again.')
@@ -250,6 +250,7 @@ function LoginPage({ onLogin }) {
   }
 
   if (errorModal) {
+    const isExpired = errorModal.includes('expired') || errorModal.includes('Expired')
     return (
       <div className="cyber-bg flex items-center justify-center p-4">
         <LoginMatrix />
@@ -257,7 +258,9 @@ function LoginPage({ onLogin }) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10">
             <FiAlertTriangle className="text-red-300 text-2xl" />
           </div>
-          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">Access Denied</h2>
+          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">
+            {isExpired ? 'PLAN EXPIRED' : 'Access Denied'}
+          </h2>
           <div className="my-4 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-3">
             <p className="text-sm text-red-200 font-mono leading-relaxed text-left">{errorModal}</p>
           </div>
@@ -275,7 +278,7 @@ function LoginPage({ onLogin }) {
               className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
             >
               <SiTelegram className="text-base" />
-              CONTACT SUPPORT
+              {isExpired ? 'RENEW ON TELEGRAM' : 'CONTACT SUPPORT'}
             </a>
           </div>
         </div>
