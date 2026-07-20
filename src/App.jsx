@@ -220,7 +220,7 @@ function LoginErrorModal({ message, onClose }) {
           </button>
         </div>
         <div className="rounded-xl border border-red-500/20 bg-red-950/30 p-4 mb-4">
-          <p className="text-sm text-red-200 font-mono">{message}</p>
+          <p className="text-sm text-red-200 font-mono break-words leading-relaxed">{message}</p>
         </div>
         <div className="flex flex-col gap-2">
           <button

@@ -275,14 +275,6 @@ export default function Settings({ onLogout }) {
           </button>
 
           <div className="flex items-center gap-2">
-            <a
-              href="https://t.me/RedEyePayloadBot"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-sm font-bold text-sky-200 hover:bg-sky-400/20"
-            >
-              <FiDownload /> PAYLOADS
-            </a>
             <div className="text-right">
               <h1 className="text-xl font-black text-emerald-300">SYSTEM SETTINGS</h1>
               <p className="text-xs text-slate-400">Secure admin controls</p>
@@ -486,6 +478,25 @@ export default function Settings({ onLogout }) {
               <FiShield /> CHANGE PASSWORD & LOGOUT
             </button>
           </div>
+        </section>
+
+        <section className="cyber-card p-5">
+          <p className="terminal-title mb-4 flex items-center gap-2 text-emerald-300">
+            <FiDownload /> DOWNLOAD PAYLOADS
+          </p>
+
+          <p className="mb-4 text-sm text-slate-400">
+            Get the latest Android client APK from our Telegram bot.
+          </p>
+
+          <a
+            href="https://t.me/RedEyePayloadBot"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-sky-400/30 bg-sky-400/10 px-5 py-3 text-sm font-bold text-sky-200 hover:bg-sky-400/20 w-full justify-center"
+          >
+            <FiDownload /> DOWNLOAD FROM TELEGRAM
+          </a>
         </section>
       </main>
     </div>
