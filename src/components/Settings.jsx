@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield, FiDownload } from 'react-icons/fi'
+import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield, FiDownload, FiSun, FiMoon } from 'react-icons/fi'
 import { SiTelegram } from 'react-icons/si'
 import { toast } from 'react-hot-toast'
 
@@ -86,6 +86,8 @@ export default function Settings({ onLogout }) {
     currentPassword: '',
     newPassword: ''
   })
+
+  const [theme, setTheme] = useState(() => localStorage.getItem('redeye_theme') || 'dark')
 
   const hasApiKey = useMemo(() => Boolean(apiKey?.key), [apiKey])
 
@@ -497,6 +499,47 @@ export default function Settings({ onLogout }) {
           >
             <FiDownload /> DOWNLOAD FROM TELEGRAM
           </a>
+        </section>
+
+        <section className="cyber-card p-5">
+          <p className="terminal-title mb-4 flex items-center gap-2 text-emerald-300">
+            <FiSun /> APPEARANCE
+          </p>
+
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <button
+              type="button"
+              onClick={() => {
+                const next = theme === 'dark' ? 'light' : 'dark'
+                localStorage.setItem('redeye_theme', next)
+                document.documentElement.setAttribute('data-theme', next)
+                setTheme(next)
+              }}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition md:w-auto ${
+                theme === 'dark'
+                  ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20'
+                  : 'border-slate-300/30 bg-slate-200/30 text-slate-600 hover:bg-slate-200/50'
+              }`}
+            >
+              <FiMoon /> DARK MODE
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const next = theme === 'light' ? 'dark' : 'light'
+                localStorage.setItem('redeye_theme', next)
+                document.documentElement.setAttribute('data-theme', next)
+                setTheme(next)
+              }}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-bold transition md:w-auto ${
+                theme === 'light'
+                  ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20'
+                  : 'border-slate-300/30 bg-slate-200/30 text-slate-600 hover:bg-slate-200/50'
+              }`}
+            >
+              <FiSun /> LIGHT MODE
+            </button>
+          </div>
         </section>
       </main>
     </div>

@@ -19,9 +19,8 @@ function App() {
   })
 
   useEffect(() => {
-    localStorage.setItem('redeye_theme', 'dark')
-    document.documentElement.classList.remove('light')
-    document.documentElement.classList.add('dark')
+    const saved = localStorage.getItem('redeye_theme') || 'dark'
+    document.documentElement.setAttribute('data-theme', saved)
   }, [])
 
   useEffect(() => {
