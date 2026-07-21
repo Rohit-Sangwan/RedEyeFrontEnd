@@ -142,8 +142,7 @@ export default function DeviceDetail() {
       mountedRef.current = false
       clearInterval(interval)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceId])
+    }, [deviceId])
 
   function updateDraft(patch) {
     dirtyRef.current = true

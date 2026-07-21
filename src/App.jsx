@@ -312,7 +312,7 @@ function LoginPage({ onLogin }) {
             <span>GET ADMIN KEY</span>
           </a>
           <p className="text-center text-sm text-slate-400 mt-4">
-            Don't have an account?{' '}
+            Don{"'"}t have an account?{' '}
             <Link to="/signup" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
               Sign Up Free
             </Link>

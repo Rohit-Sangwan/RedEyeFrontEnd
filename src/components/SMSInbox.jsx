@@ -180,7 +180,6 @@ export default function SMSInbox({ deviceId }) {
       mountedRef.current = false
       clearInterval(interval)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceId])
 
   const filtered = useMemo(() => {
