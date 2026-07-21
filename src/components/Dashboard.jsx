@@ -36,16 +36,19 @@ export default function Dashboard({ onLogout, user }) {
     wsRef.current = ws
     ws.onopen = () => console.info('RedEye live socket online')
     ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data)
-      if (msg.type === 'initial-devices' && Array.isArray(msg.data) && msg.data.length) setDevices(msg.data)
-      if (msg.type === 'device-online') { fetchDevices() }
-      if (msg.type === 'device-offline') { fetchDevices() }
-      if (msg.type === 'device-update') fetchDevices()
-      if (msg.type === 'sms-received' || msg.type === 'sms:new') {
-        toast.success(`SMS PACKET CAPTURED: ${msg.data?.sender || 'unknown'}`)
-        window.dispatchEvent(new CustomEvent('sms:new', { detail: msg.data }))
-      }
-      if (msg.type === 'command-result' && !msg.data?.success) toast.error(`COMMAND FAILED: ${msg.data?.error || 'unknown'}`)
+      let msg
+      try { msg = JSON.parse(e.data) } catch { return }
+      try {
+        if (msg.type === 'initial-devices' && Array.isArray(msg.data) && msg.data.length) setDevices(msg.data)
+        if (msg.type === 'device-online') { fetchDevices().catch(() => {}) }
+        if (msg.type === 'device-offline') { fetchDevices().catch(() => {}) }
+        if (msg.type === 'device-update') fetchDevices().catch(() => {})
+        if (msg.type === 'sms-received' || msg.type === 'sms:new') {
+          toast.success(`SMS PACKET CAPTURED: ${msg.data?.sender || 'unknown'}`)
+          window.dispatchEvent(new CustomEvent('sms:new', { detail: msg.data }))
+        }
+        if (msg.type === 'command-result' && !msg.data?.success) toast.error(`COMMAND FAILED: ${msg.data?.error || 'unknown'}`)
+      } catch {}
     }
     ws.onerror = () => toast.error('LIVE SOCKET ERROR')
     return () => ws.close()
