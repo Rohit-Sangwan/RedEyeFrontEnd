@@ -24,6 +24,7 @@ export default function Dashboard({ onLogout, user }) {
     const res = await fetch(`${API_BASE}/devices`, { headers: authHeaders() })
     if (res.status === 401 || res.status === 403) return onLogout()
     const data = await res.json()
+    console.log('[DASHBOARD] fetchDevices response:', data.success, 'devices count:', data.devices?.length, data.error || '')
     if (data.success) setDevices(data.devices || [])
     setLoading(false)
   }
@@ -37,9 +38,10 @@ export default function Dashboard({ onLogout, user }) {
     ws.onopen = () => console.info('RedEye live socket online')
     ws.onmessage = (e) => {
       let msg
-      try { msg = JSON.parse(e.data) } catch { return }
+      try { msg = JSON.parse(e.data) } catch { console.warn('[DASHBOARD] WS bad JSON:', e.data); return }
+      console.log('[DASHBOARD] WS msg:', msg.type, msg.type === 'initial-devices' ? `devices=${msg.data?.length}` : '')
       try {
-        if (msg.type === 'initial-devices' && Array.isArray(msg.data) && msg.data.length) setDevices(msg.data)
+        if (msg.type === 'initial-devices') setDevices(msg.data || [])
         if (msg.type === 'device-online') { fetchDevices().catch(() => {}) }
         if (msg.type === 'device-offline') { fetchDevices().catch(() => {}) }
         if (msg.type === 'device-update') fetchDevices().catch(() => {})
