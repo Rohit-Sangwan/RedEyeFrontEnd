@@ -129,42 +129,70 @@ export default function BalanceTab() {
           )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-emerald-400/20 bg-slate-950/70">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-emerald-500/20 text-left text-xs uppercase tracking-wider text-slate-400">
-                <th className="px-4 py-3 font-bold">TIME</th>
-                <th className="px-4 py-3 font-bold">DEVICE</th>
-                <th className="px-4 py-3 font-bold">BANK</th>
-                <th className="px-4 py-3 font-bold">TYPE</th>
-                <th className="px-4 py-3 font-bold">AMOUNT</th>
-                <th className="px-4 py-3 font-bold">BALANCE</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx, i) => (
-                <tr key={tx.id} className={`border-b border-emerald-500/10 ${i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
-                  <td className="px-4 py-3 text-slate-400">{formatDate(tx.created_at)}</td>
-                  <td className="px-4 py-3 font-mono text-slate-300">{tx.device_uid || '—'}</td>
-                  <td className="px-4 py-3 text-slate-300">{tx.bank_name || '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      tx.transaction_type === 'debit' ? 'bg-red-400/15 text-red-300' :
-                      tx.transaction_type === 'credit' ? 'bg-blue-400/15 text-blue-300' :
-                      'bg-emerald-400/15 text-emerald-300'
-                    }`}>
-                      {tx.transaction_type?.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-bold text-slate-200">{formatAmount(tx.amount)}</td>
-                  <td className="px-4 py-3 font-bold text-emerald-300">{formatAmount(tx.available_balance)}</td>
+        <div>
+          {/* Desktop table */}
+          <div className="hidden overflow-hidden rounded-2xl border border-emerald-400/20 bg-slate-950/70 md:block">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-emerald-500/20 text-left text-xs uppercase tracking-wider text-slate-400">
+                  <th className="px-4 py-3 font-bold">TIME</th>
+                  <th className="px-4 py-3 font-bold">DEVICE</th>
+                  <th className="px-4 py-3 font-bold">BANK</th>
+                  <th className="px-4 py-3 font-bold">TYPE</th>
+                  <th className="px-4 py-3 font-bold">AMOUNT</th>
+                  <th className="px-4 py-3 font-bold">BALANCE</th>
                 </tr>
-              ))}
-              {!transactions.length && (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500">No bank transactions parsed yet</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {transactions.map((tx, i) => (
+                  <tr key={tx.id} className={`border-b border-emerald-500/10 ${i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
+                    <td className="px-4 py-3 text-slate-400">{formatDate(tx.created_at)}</td>
+                    <td className="px-4 py-3 font-mono text-slate-300">{tx.device_uid || '—'}</td>
+                    <td className="px-4 py-3 text-slate-300">{tx.bank_name || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        tx.transaction_type === 'debit' ? 'bg-red-400/15 text-red-300' :
+                        tx.transaction_type === 'credit' ? 'bg-blue-400/15 text-blue-300' :
+                        'bg-emerald-400/15 text-emerald-300'
+                      }`}>
+                        {tx.transaction_type?.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-bold text-slate-200">{formatAmount(tx.amount)}</td>
+                    <td className="px-4 py-3 font-bold text-emerald-300">{formatAmount(tx.available_balance)}</td>
+                  </tr>
+                ))}
+                {!transactions.length && (
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500">No bank transactions parsed yet</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="space-y-3 md:hidden">
+            {transactions.map((tx) => (
+              <div key={tx.id} className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400">{formatDate(tx.created_at)}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    tx.transaction_type === 'debit' ? 'bg-red-400/15 text-red-300' :
+                    tx.transaction_type === 'credit' ? 'bg-blue-400/15 text-blue-300' :
+                    'bg-emerald-400/15 text-emerald-300'
+                  }`}>
+                    {tx.transaction_type?.toUpperCase()}
+                  </span>
+                </div>
+                <div className="mb-2 font-mono text-xs text-slate-300">{tx.device_uid || '—'} · {tx.bank_name || '—'}</div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-200">{formatAmount(tx.amount)}</span>
+                  <span className="text-sm font-bold text-emerald-300">{formatAmount(tx.available_balance)}</span>
+                </div>
+              </div>
+            ))}
+            {!transactions.length && (
+              <div className="rounded-2xl border border-emerald-400/20 bg-slate-950/70 py-12 text-center text-sm text-slate-500">No bank transactions parsed yet</div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -37,7 +37,7 @@ export default function Dashboard({ onLogout, user }) {
     ws.onopen = () => console.info('RedEye live socket online')
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data)
-      if (msg.type === 'initial-devices') setDevices(msg.data || [])
+      if (msg.type === 'initial-devices' && Array.isArray(msg.data) && msg.data.length) setDevices(msg.data)
       if (msg.type === 'device-online') { fetchDevices() }
       if (msg.type === 'device-offline') { fetchDevices() }
       if (msg.type === 'device-update') fetchDevices()
@@ -61,7 +61,7 @@ export default function Dashboard({ onLogout, user }) {
     <div className="cyber-bg">
       <MatrixBackdrop />
       <header className="border-b border-emerald-400/20 bg-black/30 backdrop-blur">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
           <div className="flex items-center gap-3">
             <div className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 p-3 text-emerald-300"><FiShield /></div>
             <div>
