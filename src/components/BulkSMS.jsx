@@ -252,18 +252,18 @@ export default function BulkSMS({ deviceId, device, onSentSuccess }) {
         <FiFileText /> BULK SMS
       </h2>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-col gap-2 md:flex-row">
         <button
           type="button"
           onClick={() => setBulkMode('manual')}
-          className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${bulkMode === 'manual' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${bulkMode === 'manual' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
         >
           <FiClipboard className="mr-1 inline" /> MANUAL
         </button>
         <button
           type="button"
           onClick={() => setBulkMode('csv')}
-          className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${bulkMode === 'csv' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${bulkMode === 'csv' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
         >
           <FiFileText className="mr-1 inline" /> CSV IMPORT
         </button>
@@ -312,13 +312,13 @@ export default function BulkSMS({ deviceId, device, onSentSuccess }) {
             placeholder={`Format:\n+919999999999 | message one\n+918888888888 | message two`}
           />
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <span className="text-xs text-slate-500">{bulkLines.length} message{bulkLines.length !== 1 ? 's' : ''} parsed</span>
             <button
               type="button"
               disabled={bulkSending || !bulkLines.length}
               onClick={sendBulk}
-              className="rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60"
+              className="w-full rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60 md:w-auto"
             >
               {bulkSending ? 'QUEUEING…' : `SEND BULK SMS (${bulkLines.length})`}
             </button>
@@ -387,43 +387,64 @@ export default function BulkSMS({ deviceId, device, onSentSuccess }) {
               </div>
 
               <div className="mb-3 max-h-64 overflow-y-auto rounded-xl border border-emerald-500/20">
-                <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-slate-900/95">
-                    <tr className="border-b border-emerald-500/20 text-left text-slate-400">
-                      <th className="px-3 py-2 font-bold">#</th>
-                      <th className="px-3 py-2 font-bold">PHONE</th>
-                      <th className="px-3 py-2 font-bold">NAME</th>
-                      <th className="px-3 py-2 font-bold">MESSAGE</th>
-                      <th className="px-3 py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {csvPreview.map((row, i) => (
-                      <tr key={i} className={`border-b border-emerald-500/10 ${i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
-                        <td className="px-3 py-2 text-slate-500">{i + 1}</td>
-                        <td className="px-3 py-2 font-mono text-emerald-300">{row.phone}</td>
-                        <td className="px-3 py-2 text-slate-300">{row.name || '—'}</td>
-                        <td className="max-w-xs truncate px-3 py-2 text-slate-300">{messageTemplate ? row.message : '—'}</td>
-                        <td className="px-3 py-2">
-                          <button
-                            type="button"
-                            onClick={() => removeCsvContact(i)}
-                            className="text-red-400/60 hover:text-red-300"
-                          >
-                            <FiX />
-                          </button>
-                        </td>
+                <div className="hidden md:block">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-slate-900/95">
+                      <tr className="border-b border-emerald-500/20 text-left text-slate-400">
+                        <th className="px-3 py-2 font-bold">#</th>
+                        <th className="px-3 py-2 font-bold">PHONE</th>
+                        <th className="px-3 py-2 font-bold">NAME</th>
+                        <th className="px-3 py-2 font-bold">MESSAGE</th>
+                        <th className="px-3 py-2"></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {csvPreview.map((row, i) => (
+                        <tr key={i} className={`border-b border-emerald-500/10 ${i % 2 === 0 ? 'bg-black/20' : 'bg-emerald-950/20'}`}>
+                          <td className="px-3 py-2 text-slate-500">{i + 1}</td>
+                          <td className="px-3 py-2 font-mono text-emerald-300">{row.phone}</td>
+                          <td className="px-3 py-2 text-slate-300">{row.name || '—'}</td>
+                          <td className="max-w-xs truncate px-3 py-2 text-slate-300">{messageTemplate ? row.message : '—'}</td>
+                          <td className="px-3 py-2">
+                            <button
+                              type="button"
+                              onClick={() => removeCsvContact(i)}
+                              className="text-red-400/60 hover:text-red-300"
+                            >
+                              <FiX />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="space-y-2 md:hidden">
+                  {csvPreview.map((row, i) => (
+                    <div key={i} className="flex items-start gap-2 border-b border-emerald-500/10 px-3 py-2">
+                      <span className="shrink-0 text-xs text-slate-500">{i + 1}.</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-xs text-emerald-300">{row.phone}</div>
+                        <div className="text-xs text-slate-300">{row.name || '—'}</div>
+                        <div className="mt-1 truncate text-xs text-slate-400">{messageTemplate ? row.message : '—'}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeCsvContact(i)}
+                        className="shrink-0 text-red-400/60 hover:text-red-300"
+                      >
+                        <FiX />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <button
                 type="button"
                 disabled={bulkSending || !csvPreview.length}
                 onClick={sendCsvBulk}
-                className="rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60"
+                className="w-full rounded-xl bg-emerald-400 px-5 py-2.5 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60 md:w-auto"
               >
                 {bulkSending ? 'QUEUEING…' : `SEND CSV BULK SMS (${csvPreview.length})`}
               </button>

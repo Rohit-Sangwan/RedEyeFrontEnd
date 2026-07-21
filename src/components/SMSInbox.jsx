@@ -244,7 +244,7 @@ export default function SMSInbox({ deviceId }) {
           type="button"
           onClick={refreshNow}
           disabled={refreshing}
-          className="rounded-xl border border-emerald-500/40 px-4 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10 disabled:opacity-60"
+          className="w-full rounded-xl border border-emerald-500/40 px-4 py-2.5 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10 disabled:opacity-60 md:w-auto md:py-2"
         >
           {refreshing ? 'SYNCING…' : 'REFRESH'}
         </button>

@@ -24,7 +24,6 @@ export default function Dashboard({ onLogout, user }) {
     const res = await fetch(`${API_BASE}/devices`, { headers: authHeaders() })
     if (res.status === 401 || res.status === 403) return onLogout()
     const data = await res.json()
-    console.log('[DASHBOARD] fetchDevices response:', data.success, 'devices count:', data.devices?.length, data.error || '')
     if (data.success) setDevices(data.devices || [])
     setLoading(false)
   }
@@ -35,11 +34,10 @@ export default function Dashboard({ onLogout, user }) {
     if (!token || !WS_BASE) return
     const ws = new WebSocket(`${WS_BASE}/admin?token=${token}`)
     wsRef.current = ws
-    ws.onopen = () => console.info('RedEye live socket online')
+    ws.onopen = () => {}
     ws.onmessage = (e) => {
       let msg
-      try { msg = JSON.parse(e.data) } catch { console.warn('[DASHBOARD] WS bad JSON:', e.data); return }
-      console.log('[DASHBOARD] WS msg:', msg.type, msg.type === 'initial-devices' ? `devices=${msg.data?.length}` : '')
+      try { msg = JSON.parse(e.data) } catch { return }
       try {
         if (msg.type === 'initial-devices') setDevices(msg.data || [])
         if (msg.type === 'device-online') { fetchDevices().catch(() => {}) }
@@ -74,14 +72,14 @@ export default function Dashboard({ onLogout, user }) {
               <h1 className="text-2xl font-black">Admin Operations</h1>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:flex-wrap md:items-center">
             {user?.expires_at && user?.role !== 'owner' && (() => {
               const days = daysRemaining(user.expires_at)
               if (days === null) return null
               const isExpired = days <= 0
               const isWarning = days > 0 && days <= 7
               return (
-                <span className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold ${
+                <span className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold md:w-auto ${
                   isExpired ? 'border-red-400/40 bg-red-400/15 text-red-300' :
                   isWarning ? 'border-yellow-400/40 bg-yellow-400/15 text-yellow-300' :
                   'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
@@ -91,14 +89,14 @@ export default function Dashboard({ onLogout, user }) {
                 </span>
               )
             })()}
-            {user?.role === 'owner' && <Link to="/owner" className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm font-bold text-amber-100 transition hover:bg-amber-400/20"><FiShield /> Owner Panel</Link>}
-            <Link to="/settings" className="cyber-btn"><FiSettings /> Settings</Link>
-            <button onClick={onLogout} className="danger-btn"><FiLogOut /> Logout</button>
+            {user?.role === 'owner' && <Link to="/owner" className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm font-bold text-amber-100 transition hover:bg-amber-400/20 md:w-auto"><FiShield /> Owner Panel</Link>}
+            <Link to="/settings" className="flex w-full items-center justify-center gap-2 cyber-btn md:w-auto"><FiSettings /> Settings</Link>
+            <button onClick={onLogout} className="flex w-full items-center justify-center gap-2 danger-btn md:w-auto"><FiLogOut /> Logout</button>
           </div>
         </div>
       </header>
 
-      <main className="p-6">
+      <main className="p-4 md:p-6">
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Stat label="TOTAL DEVICES" value={devices.length} />
           <Stat label="ONLINE" value={online} />
@@ -106,16 +104,16 @@ export default function Dashboard({ onLogout, user }) {
           <Stat label="FAVORITES" value={fav} />
         </div>
 
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex flex-col gap-2 md:flex-row">
           <button
             onClick={() => setActiveTab('devices')}
-            className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${activeTab === 'devices' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+            className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${activeTab === 'devices' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
           >
             <FiSmartphone className="mr-1 inline" /> DEVICES
           </button>
           <button
             onClick={() => setActiveTab('balances')}
-            className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${activeTab === 'balances' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+            className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${activeTab === 'balances' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
           >
             <FiDollarSign className="mr-1 inline" /> BALANCES
           </button>

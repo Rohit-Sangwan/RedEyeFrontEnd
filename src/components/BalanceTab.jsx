@@ -72,16 +72,16 @@ export default function BalanceTab() {
         />
       </div>
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex flex-col gap-2 md:flex-row">
         <button
           onClick={() => setTab('overview')}
-          className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${tab === 'overview' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${tab === 'overview' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
         >
           <FiSmartphone className="mr-1 inline" /> DEVICE BALANCES
         </button>
         <button
           onClick={() => setTab('transactions')}
-          className={`rounded-xl border px-4 py-2 text-xs font-bold transition ${tab === 'transactions' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
+          className={`w-full justify-center rounded-xl border px-4 py-2.5 text-xs font-bold transition md:w-auto md:py-2 ${tab === 'transactions' ? 'border-emerald-300/60 bg-emerald-400/25 text-emerald-50' : 'border-emerald-500/30 text-emerald-300/60 hover:bg-emerald-500/10'}`}
         >
           <FiDatabase className="mr-1 inline" /> TRANSACTIONS
         </button>

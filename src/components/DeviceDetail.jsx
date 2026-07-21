@@ -260,7 +260,7 @@ export default function DeviceDetail() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="mb-3 inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 px-3 py-2 text-sm text-emerald-200 hover:bg-emerald-500/10"
+              className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 px-3 py-2 text-sm text-emerald-200 hover:bg-emerald-500/10 md:w-auto"
             >
               <FiArrowLeft /> BACK
             </button>
@@ -279,9 +279,9 @@ export default function DeviceDetail() {
             type="button"
             onClick={wakeDevice}
             disabled={wakeLoading}
-            className="rounded-xl border border-emerald-500/40 px-4 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/40 px-4 py-2.5 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10 disabled:opacity-60 md:w-auto md:py-2"
           >
-            <FiRefreshCw className="mr-2 inline" />
+            <FiRefreshCw />
             {wakeLoading ? 'WAKING…' : 'WAKE DEVICE'}
           </button>
         </header>
@@ -318,7 +318,7 @@ export default function DeviceDetail() {
           </div>
         </section>
 
-        <nav className="cyber-card flex flex-wrap gap-2 p-2">
+        <nav className="cyber-card grid grid-cols-2 gap-2 p-2 md:flex md:flex-wrap">
           {[
             ['info', <FiEdit3 key="i" />, 'Device Info'],
             ['sms', <FiMessageSquare key="s" />, 'Incoming SMS'],
@@ -331,13 +331,13 @@ export default function DeviceDetail() {
               key={key}
               type="button"
               onClick={() => setActiveTab(key)}
-              className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+              className={`rounded-xl px-3 py-2.5 text-xs font-bold transition md:px-4 md:py-2 md:text-sm ${
                 activeTab === key
                   ? 'bg-emerald-500 text-black'
                   : 'border border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/10'
               }`}
             >
-              <span className="mr-2 inline-flex align-middle">{icon}</span>
+              <span className="mr-1.5 inline-flex align-middle md:mr-2">{icon}</span>
               {label}
             </button>
           ))}

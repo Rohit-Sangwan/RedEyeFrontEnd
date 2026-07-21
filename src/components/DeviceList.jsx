@@ -69,8 +69,8 @@ export default function DeviceList({ devices, loading, onUpdated, onDeleted }) {
         <div><p className="terminal-title">device folders</p><h2 className="text-xl font-black">Managed Devices</h2></div>
         <div className="relative w-full max-w-sm"><FiSearch className="absolute left-3 top-3.5 text-emerald-300/60"/><input className="cyber-input pl-10" value={search} onChange={e=>setSearch(e.target.value)} placeholder="search uid/model/nickname/phone" /></div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {folders.map(([k,label]) => <button key={k} onClick={()=>setTab(k)} className={`cyber-btn compact ${tab===k?'active':''}`}><FolderLabel kind={k} label={label}/></button>)}
+      <div className="mt-4 flex flex-col gap-2 md:flex-row md:flex-wrap">
+        {folders.map(([k,label]) => <button key={k} onClick={()=>setTab(k)} className={`w-full justify-center md:w-auto cyber-btn compact ${tab===k?'active':''}`}><FolderLabel kind={k} label={label}/></button>)}
       </div>
     </div>
     <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-2 2xl:grid-cols-3">

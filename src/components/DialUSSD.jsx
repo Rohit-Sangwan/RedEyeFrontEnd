@@ -122,6 +122,7 @@ export default function DialUSSD({ deviceId, device }) {
         >
           {sending ? 'DIALING…' : 'DIAL USSD CODE'}
         </button>
+
       </form>
 
       <div className="border-t border-emerald-500/20 pt-4">
@@ -133,10 +134,10 @@ export default function DialUSSD({ deviceId, device }) {
               type="button"
               disabled={sending}
               onClick={() => { setUssdCode(item.code); sendUSSD(item.code) }}
-              className="flex flex-col items-center gap-1 rounded-xl border border-emerald-500/20 bg-black/30 p-3 text-center hover:bg-emerald-500/10 transition-all"
+              className="flex flex-col items-center gap-1 rounded-xl border border-emerald-500/20 bg-black/30 p-4 text-center hover:bg-emerald-500/10 transition-all"
             >
               <span className="font-mono text-sm font-bold text-emerald-300">{item.code}</span>
-              <span className="text-[10px] text-slate-500">{item.label}</span>
+              <span className="text-[11px] text-slate-500">{item.label}</span>
             </button>
           ))}
         </div>

@@ -119,7 +119,7 @@ export default function SendSMS({ deviceId, device, onSentSuccess }) {
         <button
           type="button"
           onClick={pasteNormalNumberMessage}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 px-4 py-2 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/40 px-4 py-2.5 text-sm font-bold text-emerald-200 hover:bg-emerald-500/10 md:w-auto md:py-2"
         >
           <FiClipboard /> PASTE NUMBER | MESSAGE
         </button>
@@ -172,7 +172,7 @@ export default function SendSMS({ deviceId, device, onSentSuccess }) {
         <button
           type="submit"
           disabled={sending}
-          className="rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60"
+          className="w-full rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60 md:w-auto"
         >
           {sending ? 'TRANSMITTING…' : 'SEND SMS COMMAND'}
         </button>

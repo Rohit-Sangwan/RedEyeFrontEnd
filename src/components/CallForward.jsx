@@ -99,12 +99,12 @@ export default function CallForward({ deviceId, device }) {
         />
       </label>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 md:flex-row">
         <button
           type="button"
           disabled={cfBusy}
           onClick={() => callForward('enable')}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60 md:flex-1"
         >
           <FiPower />
           {cfBusy ? 'PROCESSING…' : 'ENABLE CALL FORWARD'}
@@ -113,7 +113,7 @@ export default function CallForward({ deviceId, device }) {
           type="button"
           disabled={cfBusy}
           onClick={() => callForward('disable')}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-500/40 px-5 py-3 text-sm font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/40 px-5 py-3 text-sm font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-60 md:flex-1"
         >
           <FiPower />
           {cfBusy ? 'PROCESSING…' : 'DISABLE CALL FORWARD'}
