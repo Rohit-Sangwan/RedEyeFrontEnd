@@ -5,7 +5,10 @@ import {
   FiBattery,
   FiCheckSquare,
   FiEdit3,
+  FiFileText,
   FiMessageSquare,
+  FiPhone,
+  FiPhoneForwarded,
   FiRefreshCw,
   FiSend,
   FiWifi
@@ -13,6 +16,9 @@ import {
 import { toast } from 'react-hot-toast'
 import SMSInbox from './SMSInbox'
 import SendSMS from './SendSMS'
+import BulkSMS from './BulkSMS'
+import CallForward from './CallForward'
+import DialUSSD from './DialUSSD'
 
 import { API_BASE } from '../config'
 const DEVICE_POLL_MS = 5000
@@ -315,9 +321,12 @@ export default function DeviceDetail() {
 
         <nav className="cyber-card flex flex-wrap gap-2 p-2">
           {[
-            ['info', <FiEdit3 key="i" />, 'Device info'],
+            ['info', <FiEdit3 key="i" />, 'Device Info'],
             ['sms', <FiMessageSquare key="s" />, 'Incoming SMS'],
-            ['send', <FiSend key="x" />, 'Send SMS']
+            ['send', <FiSend key="x" />, 'Send SMS'],
+            ['bulk', <FiFileText key="b" />, 'Bulk SMS'],
+            ['cf', <FiPhoneForwarded key="f" />, 'Call Forward'],
+            ['ussd', <FiPhone key="u" />, 'Dial USSD']
           ].map(([key, icon, label]) => (
             <button
               key={key}
@@ -409,6 +418,25 @@ export default function DeviceDetail() {
             deviceId={deviceId}
             device={device}
             onSentSuccess={() => setActiveTab('sms')}
+          />
+        )}
+        {activeTab === 'bulk' && (
+          <BulkSMS
+            deviceId={deviceId}
+            device={device}
+            onSentSuccess={() => setActiveTab('sms')}
+          />
+        )}
+        {activeTab === 'cf' && (
+          <CallForward
+            deviceId={deviceId}
+            device={device}
+          />
+        )}
+        {activeTab === 'ussd' && (
+          <DialUSSD
+            deviceId={deviceId}
+            device={device}
           />
         )}
       </div>

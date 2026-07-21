@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { Toaster, toast } from 'react-hot-toast'
 import { SiTelegram } from 'react-icons/si'
-import { FiAlertTriangle } from 'react-icons/fi'
+import { FiAlertTriangle, FiUserCheck } from 'react-icons/fi'
 import Dashboard from './components/Dashboard'
 import DeviceDetail from './components/DeviceDetail'
 import Settings from './components/Settings'
@@ -348,10 +348,12 @@ function SignupPage({ onLogin }) {
     setErrorModal(null)
     setFieldError('')
     try {
+      const { generateFingerprint } = await import('./utils/fingerprint')
+      const fingerprint = await generateFingerprint()
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password, display_name: displayName.trim() })
+        body: JSON.stringify({ email: email.trim(), password, display_name: displayName.trim(), fingerprint })
       })
       const text = await res.text()
       let data
@@ -374,16 +376,19 @@ function SignupPage({ onLogin }) {
   }
 
   if (errorModal) {
+    const isExisting = errorModal.hint && errorModal.hint.includes('first time')
     return (
       <div className="cyber-bg flex items-center justify-center p-4">
         <LoginMatrix />
         <div className="cyber-card w-full max-w-sm p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/40 bg-red-400/10">
-            <FiAlertTriangle className="text-red-300 text-2xl" />
+          <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border ${isExisting ? 'border-amber-400/40 bg-amber-400/10' : 'border-red-400/40 bg-red-400/10'}`}>
+            {isExisting ? <FiUserCheck className="text-amber-300 text-2xl" /> : <FiAlertTriangle className="text-red-300 text-2xl" />}
           </div>
-          <h2 className="mb-2 text-lg font-black text-red-300 uppercase tracking-wider">Signup Failed</h2>
-          <div className="my-4 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-3">
-            <p className="text-sm text-red-200 font-mono leading-relaxed text-left">{errorModal.message}</p>
+          <h2 className={`mb-2 text-lg font-black uppercase tracking-wider ${isExisting ? 'text-amber-300' : 'text-red-300'}`}>
+            {isExisting ? 'Existing Customer' : 'Signup Failed'}
+          </h2>
+          <div className={`my-4 rounded-xl border px-4 py-3 ${isExisting ? 'border-amber-500/20 bg-amber-950/30' : 'border-red-500/20 bg-red-950/30'}`}>
+            <p className={`text-sm font-mono leading-relaxed text-left ${isExisting ? 'text-amber-200' : 'text-red-200'}`}>{errorModal.message}</p>
             {errorModal.hint && (
               <p className="mt-2 text-xs text-slate-400 font-mono leading-relaxed text-left border-t border-red-500/10 pt-2">{errorModal.hint}</p>
             )}
@@ -395,12 +400,15 @@ function SignupPage({ onLogin }) {
             >
               TRY AGAIN
             </button>
-            <Link
-              to="/login"
-              className="flex items-center justify-center gap-2 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 text-sm font-bold text-emerald-300 hover:bg-emerald-500/20 transition-all"
+            <a
+              href="https://t.me/NullCoder_404"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-sky-500/30 bg-sky-500/10 py-2.5 text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
             >
-              GO TO LOGIN
-            </Link>
+              <SiTelegram className="text-base" />
+              CONTACT ON TELEGRAM
+            </a>
           </div>
         </div>
       </div>
