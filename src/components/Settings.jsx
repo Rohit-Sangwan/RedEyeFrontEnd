@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield, FiDownload, FiSun, FiMoon } from 'react-icons/fi'
+import { FiArrowLeft, FiCopy, FiEye, FiEyeOff, FiKey, FiPower, FiSave, FiSend, FiShield, FiDownload, FiSun, FiMoon, FiClock } from 'react-icons/fi'
 import { SiTelegram } from 'react-icons/si'
 import { toast } from 'react-hot-toast'
 
@@ -88,6 +88,44 @@ export default function Settings({ onLogout }) {
   })
 
   const [theme, setTheme] = useState(() => localStorage.getItem('redeye_theme') || 'dark')
+
+  const currentUser = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('user')) } catch { return null }
+  }, [])
+
+  const calcRemaining = useCallback(() => {
+    if (!currentUser?.expires_at) return null
+    const now = new Date()
+    const expiry = new Date(currentUser.expires_at)
+    const diff = expiry - now
+    if (diff <= 0) return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 }
+
+    let years = expiry.getFullYear() - now.getFullYear()
+    let months = expiry.getMonth() - now.getMonth()
+    let days = expiry.getDate() - now.getDate()
+    let hours = expiry.getHours() - now.getHours()
+    let minutes = expiry.getMinutes() - now.getMinutes()
+    let seconds = expiry.getSeconds() - now.getSeconds()
+
+    if (seconds < 0) { seconds += 60; minutes-- }
+    if (minutes < 0) { minutes += 60; hours-- }
+    if (hours < 0) { hours += 24; days-- }
+    if (days < 0) {
+      const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate()
+      days += prevMonth; months--
+    }
+    if (months < 0) { months += 12; years-- }
+
+    return { years, months, days, hours, minutes, seconds }
+  }, [currentUser])
+
+  const [remaining, setRemaining] = useState(calcRemaining)
+
+  useEffect(() => {
+    if (!currentUser?.expires_at) return
+    const id = setInterval(() => setRemaining(calcRemaining()), 1000)
+    return () => clearInterval(id)
+  }, [calcRemaining, currentUser])
 
   const hasApiKey = useMemo(() => Boolean(apiKey?.key), [apiKey])
 
@@ -266,7 +304,7 @@ export default function Settings({ onLogout }) {
 
   return (
     <div className="cyber-bg min-h-screen text-slate-100">
-      <header className="border-b border-emerald-500/20 bg-black/50 px-5 py-4 backdrop-blur">
+      <header className="border-b border-emerald-500/20 bg-black/50 px-5 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
           <button
             type="button"
@@ -276,14 +314,42 @@ export default function Settings({ onLogout }) {
             <FiArrowLeft /> Back
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <h1 className="text-xl font-black text-emerald-300">SYSTEM SETTINGS</h1>
-              <p className="text-xs text-slate-400">Secure admin controls</p>
-            </div>
-          </div>
+          <h1 className="text-lg font-black text-emerald-300 md:text-xl">SETTINGS</h1>
         </div>
       </header>
+
+      {remaining && currentUser?.role !== 'owner' && (
+        <div className="mx-auto max-w-7xl px-5 pt-5">
+          <section className="cyber-card overflow-hidden p-0">
+            <div className="border-b border-emerald-400/15 bg-emerald-400/5 px-5 py-3">
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-300/70">
+                <FiClock /> Remaining Access Time
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 px-5 py-6 md:gap-8 md:py-8">
+              {[
+                remaining.years > 0 && { label: 'Year', val: remaining.years },
+                remaining.months > 0 && { label: 'Month', val: remaining.months },
+                remaining.days > 0 && { label: 'Day', val: remaining.days },
+                remaining.hours > 0 && { label: 'Hour', val: remaining.hours },
+                { label: 'Min', val: remaining.minutes },
+                { label: 'Sec', val: remaining.seconds }
+              ].filter(Boolean).map((t) => (
+                <div key={t.label} className="flex flex-col items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-16 w-20 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/5 shadow-inner shadow-emerald-950/30 md:h-20 md:w-24">
+                      <span className="bg-gradient-to-b from-emerald-200 to-emerald-400 bg-clip-text text-3xl font-black tracking-tighter text-transparent md:text-4xl">
+                        {String(t.val).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300/50">{t.label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-5 p-5 xl:grid-cols-2">
         <form className="hidden" autoComplete="off" aria-hidden="true">
